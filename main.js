@@ -1,8 +1,11 @@
 /* Main game file: main.js */
-/* Game: [Your Game Name Here] */
-/* Authors: [Your Name(s) Here] */
-/* Description: [Short description of your game here] */
-/* Citations: [List any resources, libraries, tutorials, etc you used here] 
+/* Game: [why isnt HORION working] */
+/* Authors: [Mason Januskiewicz, Jayden Conde] */
+/* Description: [Balls are coming from the left side of the screen moving to the other side, 
+and you need to click on them to get rid of them depending on the radius. 
+You try to get rid of them before they make it across. They accelerate over time.] */
+/* Citations: [AI will mostlikly be used to spot check and clear up any small bugs we do not understand
+and will get help from teacher whenever option is avalable] 
 /* Note: If you use significant AI help you should cite that here as well */
 /* including summaries of prompts and/or interactions you had with the AI */
 /* In addition, of course, any AI-generated code should be clearly maked */
