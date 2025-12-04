@@ -982,8 +982,6 @@ class T extends p {
 
 let gi = new T();
 
-/* Variables: Top-Level variables defined here are used to hold game state */
-
 
 /* Drawing Functions */
 
@@ -1013,4 +1011,4 @@ gi.addHandler(
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-ffc8c822.js.map
+//# sourceMappingURL=index-4570b97d.js.map
