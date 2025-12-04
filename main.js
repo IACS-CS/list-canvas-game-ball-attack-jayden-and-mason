@@ -1,5 +1,5 @@
 /* Main game file: main.js */
-/* Game: [why isnt HORION working] */
+/* Game: [Ball Attack] */
 /* Authors: [Mason Januskiewicz, Jayden Conde] */
 /* Description: [Balls are coming from the left side of the screen moving to the other side, 
 and you need to click on them to get rid of them depending on the radius. 
@@ -21,6 +21,11 @@ import { GameInterface } from 'simple-canvas-library';
 let gi = new GameInterface();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
+//prelim number WILL be changed 
+let ballx= 2
+let bally =2
+let ballradius=2
+let clickCount =2
 
 
 /* Drawing Functions */
