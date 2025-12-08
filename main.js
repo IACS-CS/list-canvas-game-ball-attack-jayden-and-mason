@@ -19,6 +19,18 @@ import "./style.css";
 import { GameInterface } from 'simple-canvas-library';
 
 let gi = new GameInterface();
+//from last project I did -MJ
+let topbar = gi.addTopBar();
+topbar.addTitle("Ball Attack");
+topbar.addButton({
+  text: "Instructions",
+  onclick: function () {
+    gi.dialog(
+      "Instructions",
+      "Click on the balls before they reach the right side of the screen!"
+    );
+  },
+});
 
 /* Variables: Top-Level variables defined here are used to hold game state */
 //prelim number WILL be changed 
@@ -27,33 +39,32 @@ let ClickCount = 0// score
 let spawnInterval = 2000; // Initial spawn interval in milliseconds
 let lastSpawnTime = 0;// Time when the last ball was spawned
 let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
-//ball class to create ball objects
-//got help from AI to create this class cause idk how ts works-Mason Januskiewicz
-class Ball {
-  constructor(x, y, radius, speed) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.speed = speed;
-  }
-}
-  update(stepTime); {
-    this.x += this.speed * stepTime * speedmultiplier;
-  }
-
+let gameOver = false; // Game over state
 /* Drawing Functions */
+//treacher helped with the spawnball function
+function spawnBall({width, height}) { 
+ 
+  let newBall = {
+    x: 0,
+    y: Math.random() * height,
+    radius: Math.random() * 30 + 10, // Random radius between 10 and 40
+    speed: Math.random() * 50 + 50, // Random speed between 50 and 100
+  };
 
-/* Example drawing function: you can add multiple drawing functions
-that will be called in sequence each frame. It's a good idea to do 
-one function per each object you are putting on screen, and you
-may then want to break your drawing function down into sub-functions
-to make it easier to read/follow */
+  newBall.speed *= speedmultiplier;
+  balls.push(newBall);
+}
+
 gi.addDrawing(
   function ({ ctx, width, height, elapsed, stepTime }) {
-    // Your drawing code here...    
+    if (gameOver) {
+      ctx.fillStyle = "black";
+      ctx.font = "48px serif";
+      ctx.fillText("Game Over!", width / 2 - 100, height / 2);
+      return;
+    }
   }
-)
-
+);
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
@@ -63,6 +74,15 @@ gi.addHandler(
   "click",
   function ({ event, x, y }) {
     // Your click handling code here...
+    const bx = x - ball.x;
+    const by = y - ball.y;
+    const distance = Math.hypot(bx, by);
+
+    if (distance <= ball.radius) {
+      // Ball was clicked
+      balls.splice(balls.indexOf(ball), 1);
+      ClickCount++;
+    }
   }
 )
 
