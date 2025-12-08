@@ -22,11 +22,24 @@ let gi = new GameInterface();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
 //prelim number WILL be changed 
-let ballx= 2
-let bally =2
-let ballradius=2
-let clickCount =2
+let balls =[] // array to hold balls
+let ClickCount = 0// score
+let spawnInterval = 2000; // Initial spawn interval in milliseconds
+let lastSpawnTime = 0;// Time when the last ball was spawned
+let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
+//ball class to create ball objects
+//got help from AI to create this class cause idk how ts works-Mason Januskiewicz
+class Ball {
+  constructor(x, y, radius, speed) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.speed = speed;
+  }
 
+  update(stepTime) {
+    this.x += this.speed * stepTime * speedmultiplier;
+  }
 
 /* Drawing Functions */
 
