@@ -981,24 +981,27 @@ class T extends p {
 /* Main game file: main.js */
 
 let gi = new T();
-let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
-  update(stepTime); {
-    globalThis.x += globalThis.speed * stepTime * speedmultiplier;
-  }
+//from last project I did -MJ
+let topbar = gi.addTopBar();
+topbar.addTitle("Ball Attack");
+topbar.addButton({
+  text: "Instructions",
+  onclick: function () {
+    gi.dialog(
+      "Instructions",
+      "Click on the balls before they reach the right side of the screen!"
+    );
+  },
+});
 
-/* Drawing Functions */
+/* Variables: Top-Level variables defined here are used to hold game state */
+//prelim number WILL be changed 
+let balls =[]; // array to hold balls
 
-/* Example drawing function: you can add multiple drawing functions
-that will be called in sequence each frame. It's a good idea to do 
-one function per each object you are putting on screen, and you
-may then want to break your drawing function down into sub-functions
-to make it easier to read/follow */
 gi.addDrawing(
   function ({ ctx, width, height, elapsed, stepTime }) {
-    // Your drawing code here...    
   }
 );
-
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
@@ -1008,10 +1011,18 @@ gi.addHandler(
   "click",
   function ({ event, x, y }) {
     // Your click handling code here...
+    const bx = x - ball.x;
+    const by = y - ball.y;
+    const distance = Math.hypot(bx, by);
+
+    if (distance <= ball.radius) {
+      // Ball was clicked
+      balls.splice(balls.indexOf(ball), 1);
+    }
   }
 );
 
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-840b41f3.js.map
+//# sourceMappingURL=index-d94b4436.js.map
