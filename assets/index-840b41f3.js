@@ -981,7 +981,10 @@ class T extends p {
 /* Main game file: main.js */
 
 let gi = new T();
-
+let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
+  update(stepTime); {
+    globalThis.x += globalThis.speed * stepTime * speedmultiplier;
+  }
 
 /* Drawing Functions */
 
@@ -1011,4 +1014,4 @@ gi.addHandler(
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-4570b97d.js.map
+//# sourceMappingURL=index-840b41f3.js.map
