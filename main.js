@@ -13,10 +13,9 @@
 /* auto-complete it maye be impractical to mark every line, which is why you */
 /* should also include a summary here */
 
-
 import "./style.css";
 
-import { GameInterface } from 'simple-canvas-library';
+import { GameInterface } from "simple-canvas-library";
 
 let gi = new GameInterface();
 //from last project I did -MJ
@@ -27,39 +26,46 @@ topbar.addButton({
   onclick: function () {
     gi.dialog(
       "Instructions",
-      "Click on the balls before they reach the right side of the screen!"
+      "Click on the balls before they reach the right side of the screen!\nClick 'R' to restart the game if you lose."
     );
   },
 });
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-//prelim number WILL be changed 
-let balls =[] // array to hold balls
-let ClickCount = 0// score
+//prelim number WILL be changed
+let balls = []; // array to hold balls
+let ClickCount = 0; // score
 let spawnInterval = 2000; // Initial spawn interval in milliseconds
-let lastSpawnTime = 0;// Time when the last ball was spawned
+let lastSpawnTime = 0; // Time when the last ball was spawned
 let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
 let gameOver = false; // Game over state
+
 /* Drawing Functions */
 //treacher helped with the spawnball function
-function spawnBall({width, height}) { 
- 
+function spawnBall({ width, height }) {
+  // Generate a random color (written with AI assistance)
+  const colors = ["red", "blue", "green", "yellow", "purple", "orange", "cyan"];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
   let newBall = {
     x: 0,
     y: Math.random() * height,
-    radius: Math.random() * 30 + 10, // Random radius between 10 and 40
+    radius: Math.random() * 30 + 20, // Random radius between 20 and 50
     speed: Math.random() * 50 + 50, // Random speed between 50 and 100
+    color: randomColor, // Store the color on the ball
   };
-
+  speedmultiplier += 0.080085; // Increase speed multiplier over time
   newBall.speed *= speedmultiplier;
   balls.push(newBall);
 }
 
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
   if (gameOver) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "white";
     ctx.font = "48px serif";
-    ctx.fillText("Game Over!", width / 2 - 100, height / 2);
+    ctx.fillText(`Game Over!`, width / 2 - 100, height / 2);
+    ctx.font = "32px serif";
+    ctx.fillText(`Score: ${ClickCount}`, width / 2 - 100, height / 2 + 40);
     return;
   }
   // Spawn balls over time
@@ -71,7 +77,7 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
   // Draw and update all balls
   for (let ball of balls) {
     // Update ball position
-    ball.x += ball.speed * 0.016; // Rough frame time approximation
+    ball.x += ball.speed * 0.016; 
 
     // If a ball reaches the right side = GAME OVER
     if (ball.x - ball.radius > width) {
@@ -81,42 +87,49 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
     // Draw the ball
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
+    ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
     ctx.fill();
     ctx.closePath();
   }
   // Score display
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "white";
   ctx.font = "24px serif";
   ctx.fillText("Score: " + ClickCount, 10, 30);
-});  
-
-
-
+});
+//add handler to reset game when R is pressed -JC/MJ/AI
+gi.addHandler("keydown", function ({ event }) {
+  if (event.key === "r" || event.key === "R") {
+    // Reset game state
+    balls = [];
+    ClickCount = 0;
+    spawnInterval = 2000;
+    lastSpawnTime = 0;
+    speedmultiplier = 1.0;
+    gameOver = false;
+  }
+});
 
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
 any type of event -- keydown, mousemove, etc) */
-
-gi.addHandler(
-  "click",
-  function ({ event, x, y }) {
-    // Your click handling code here...
+//most of this is from jayden's previous project -JC
+gi.addHandler("click", function ({ event, x, y }) {
+  console.log(event);
+  // Your click handling code here...
+  for (let ball of balls) {
     const bx = x - ball.x;
     const by = y - ball.y;
     const distance = Math.hypot(bx, by);
 
     if (distance <= ball.radius) {
       // Ball was clicked
+      //ai autocompleted to remove ball and increment score (ball gets added after)-MJ
       balls.splice(balls.indexOf(ball), 1);
       ClickCount++;
     }
   }
-)
-
+});
 
 /* Run the game */
 gi.run();
-
-
