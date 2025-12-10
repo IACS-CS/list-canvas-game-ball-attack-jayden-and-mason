@@ -55,16 +55,45 @@ function spawnBall({width, height}) {
   balls.push(newBall);
 }
 
-gi.addDrawing(
-  function ({ ctx, width, height, elapsed, stepTime }) {
-    if (gameOver) {
-      ctx.fillStyle = "black";
-      ctx.font = "48px serif";
-      ctx.fillText("Game Over!", width / 2 - 100, height / 2);
-      return;
-    }
+gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
+  if (gameOver) {
+    ctx.fillStyle = "black";
+    ctx.font = "48px serif";
+    ctx.fillText("Game Over!", width / 2 - 100, height / 2);
+    return;
   }
-);
+  // Spawn balls over time
+  if (elapsed - lastSpawnTime > spawnInterval) {
+    spawnBall({ width, height });
+    lastSpawnTime = elapsed;
+  }
+
+  // Draw and update all balls
+  for (let ball of balls) {
+    // Update ball position
+    ball.x += ball.speed * 0.016; // Rough frame time approximation
+
+    // If a ball reaches the right side = GAME OVER
+    if (ball.x - ball.radius > width) {
+      gameOver = true;
+    }
+
+    // Draw the ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+  }
+  // Score display
+  ctx.fillStyle = "black";
+  ctx.font = "24px serif";
+  ctx.fillText("Score: " + ClickCount, 10, 30);
+});  
+
+
+
+
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
