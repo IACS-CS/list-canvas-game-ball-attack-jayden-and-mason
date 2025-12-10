@@ -997,11 +997,65 @@ topbar.addButton({
 /* Variables: Top-Level variables defined here are used to hold game state */
 //prelim number WILL be changed 
 let balls =[]; // array to hold balls
+let ClickCount = 0;// score
+let spawnInterval = 2000; // Initial spawn interval in milliseconds
+let lastSpawnTime = 0;// Time when the last ball was spawned
+let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
+let gameOver = false; // Game over state
+/* Drawing Functions */
+//treacher helped with the spawnball function
+function spawnBall({width, height}) { 
+ 
+  let newBall = {
+    x: 0,
+    y: Math.random() * height,
+    radius: Math.random() * 30 + 10, // Random radius between 10 and 40
+    speed: Math.random() * 50 + 50, // Random speed between 50 and 100
+  };
 
-gi.addDrawing(
-  function ({ ctx, width, height, elapsed, stepTime }) {
+  newBall.speed *= speedmultiplier;
+  balls.push(newBall);
+}
+
+gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
+  if (gameOver) {
+    ctx.fillStyle = "black";
+    ctx.font = "48px serif";
+    ctx.fillText("Game Over!", width / 2 - 100, height / 2);
+    return;
   }
-);
+  // Spawn balls over time
+  if (elapsed - lastSpawnTime > spawnInterval) {
+    spawnBall({ width, height });
+    lastSpawnTime = elapsed;
+  }
+
+  // Draw and update all balls
+  for (let ball of balls) {
+    // Update ball position
+    ball.x += ball.speed * 0.016; // Rough frame time approximation
+
+    // If a ball reaches the right side = GAME OVER
+    if (ball.x - ball.radius > width) {
+      gameOver = true;
+    }
+
+    // Draw the ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+  }
+  // Score display
+  ctx.fillStyle = "black";
+  ctx.font = "24px serif";
+  ctx.fillText("Score: " + ClickCount, 10, 30);
+});  
+
+
+
+
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
@@ -1018,6 +1072,7 @@ gi.addHandler(
     if (distance <= ball.radius) {
       // Ball was clicked
       balls.splice(balls.indexOf(ball), 1);
+      ClickCount++;
     }
   }
 );
@@ -1025,4 +1080,4 @@ gi.addHandler(
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-d94b4436.js.map
+//# sourceMappingURL=index-d7679e13.js.map
