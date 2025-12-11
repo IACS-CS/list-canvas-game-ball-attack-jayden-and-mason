@@ -32,7 +32,6 @@ topbar.addButton({
 });
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-//prelim number WILL be changed
 let balls = []; // array to hold balls
 let ClickCount = 0; // score
 let spawnInterval = 2000; // Initial spawn interval in milliseconds
