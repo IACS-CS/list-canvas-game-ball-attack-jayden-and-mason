@@ -33,11 +33,17 @@ topbar.addButton({
 
 /* Variables: Top-Level variables defined here are used to hold game state */
 let balls = []; // array to hold balls
-let ClickCount = 0; // score
-let spawnInterval = 2000; // Initial spawn interval in milliseconds
+let HitCount = 0; // score
+let spawnInterval = 1500; // Initial spawn interval in milliseconds
 let lastSpawnTime = 0; // Time when the last ball was spawned
 let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
 let gameOver = false; // Game over state
+let MisClicks = 0; // Number of missed clicks
+let ghost = {
+  x: 50,
+  y: 100,
+  eating : 0,
+}
 
 /* Drawing Functions */
 //treacher helped with the spawnball function
@@ -57,14 +63,33 @@ function spawnBall({ width, height }) {
   newBall.speed *= speedmultiplier;
   balls.push(newBall);
 }
+/*
+gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
+// draw a ghost that eat balls(figure out later)
+  ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; // Semi-transparent white
+  // draw ghost body with classic arc, line, and then jagged lines at the bottom
+  // starting at ghost.x, ghost.y
+  ctx.beginPath();
+  ctx.arc(ghost.x, ghost.y, 40, Math.PI, 0); // Head
+  ctx.lineTo(ghost.x + 80, ghost.y + 80);
+  for (let i = 0; i < 8; i++) {
+    ctx.lineTo(ghost.x + 80 - i * 20, ghost.y + 80 + (i % 2 === 0 ? 10 : 0));
+  }
+  ctx.lineTo(ghost.x, ghost.y + 80);
+  ctx.closePath();
+  ctx.fill();
 
+}
+);
+*/
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
   if (gameOver) {
+    let Accuracy = (HitCount / (HitCount + MisClicks)) * 100; // Accuracy percentage
     ctx.fillStyle = "white";
     ctx.font = "48px serif";
     ctx.fillText(`Game Over!`, width / 2 - 100, height / 2);
     ctx.font = "32px serif";
-    ctx.fillText(`Score: ${ClickCount}`, width / 2 - 100, height / 2 + 40);
+    ctx.fillText(`Score: ${HitCount} \n Accuracy: ${Accuracy.toFixed(2)}%`, width / 2 - 100, height / 2 + 40);
     return;
   }
   // Spawn balls over time
@@ -85,23 +110,30 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
 
     // Draw the ball
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    // draw line from center to edge...
+    ctx.moveTo(ball.x, ball.y);
+    ctx.arc(ball.x, ball.y, ball.radius,Math.PI*0.252, Math.PI * 2);
+    // and back to center
+    ctx.lineTo(ball.x, ball.y);
     ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
     ctx.fill();
     ctx.closePath();
   }
   // Score display
+   let Accuracy = (HitCount / (HitCount + MisClicks)) * 100; // Accuracy percentage
   ctx.fillStyle = "white";
   ctx.font = "24px serif";
-  ctx.fillText("Score: " + ClickCount, 10, 30);
+  ctx.fillText("Score: " + HitCount, 10, 30);
+  // Accuracy display
+  ctx.fillText("Accuracy: " + Accuracy.toFixed(2) + "%", 10, 60);
 });
-//add handler to reset game when R is pressed -JC/MJ/AI
+//add handler to reset game when R is pressed -barely AI
 gi.addHandler("keydown", function ({ event }) {
   if (event.key === "r" || event.key === "R") {
     // Reset game state
     balls = [];
-    ClickCount = 0;
-    spawnInterval = 2000;
+    HitCount = 0;
+    spawnInterval = 1500;
     lastSpawnTime = 0;
     speedmultiplier = 1.0;
     gameOver = false;
@@ -113,7 +145,7 @@ gi.addHandler("keydown", function ({ event }) {
 /* Example: Mouse click handler (you can change to handle 
 any type of event -- keydown, mousemove, etc) */
 //most of this is from jayden's previous project -JC
-gi.addHandler("click", function ({ event, x, y }) {
+gi.addHandler("mousedown", function ({ event, x, y }) {
   console.log(event);
   // Your click handling code here...
   for (let ball of balls) {
@@ -125,9 +157,19 @@ gi.addHandler("click", function ({ event, x, y }) {
       // Ball was clicked
       //ai autocompleted to remove ball and increment score (ball gets added after)-MJ
       balls.splice(balls.indexOf(ball), 1);
-      ClickCount++;
+      HitCount++;
+    } else {
+      // Click was outside the ball
+      
+      MisClicks++;
     }
   }
+});
+
+// set ghost position to mouse position
+gi.addHandler("mousemove", function ({ event, x, y }) {
+  ghost.x = x; // Center the ghost on the cursor
+  ghost.y = y;
 });
 
 /* Run the game */
