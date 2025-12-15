@@ -317,6 +317,133 @@ const game=new GameCanvas("mycanvasid")`
   }
 }
 console.log("Importing Sprite.ts");
+class m {
+  /**
+   * Creates a new Sprite instance.
+   *
+   * @param config - Configuration object for the sprite
+   * @param config.src - URL of SpriteSheet resource.
+   * @param config.x - Position of Sprite on the canvas (default: 0)
+   * @param config.y - Position of Sprite on the canvas (default: 0)
+   * @param config.frameWidth - width of each frame of the sprite sheet (required)
+   * @param config.frameHeight - height of each frame of the sprite sheet (required)
+   * @param config.frame - frame to start on (default: 0).
+   * @param config.frameSequence - list of frame indices to run (if not specified, we run all frames in order).
+   * @param config.targetWidth - width of sprite to draw on canvas (same as frameWidth if not specified)
+   * @param config.targetHeight - height of sprite to draw on canvas (same as frameHeight if not specified)
+   * @param config.animate - whether to animate or not (default: true).
+   * @param config.frameRate - Number of frames per second to run animation at (default: 24).
+   * @param config.repeat - Whether to repeat the animation or play only once (default: true)
+   * @param config.angle - Angle to rotate drawing (in radians)
+   * @param config.flipHorizontal - Whether to flip the sprite horizontally (default: false)
+   * @param config.update - a callback to run on each animation frame just before drawing sprite to canvas.
+   */
+  constructor({
+    src: t,
+    x: e = 0,
+    y: i = 0,
+    frame: s = 0,
+    frames: n,
+    // Add frames parameter
+    animate: r = !0,
+    frameSequence: a,
+    frameWidth: l,
+    frameHeight: h,
+    angle: c,
+    targetWidth: u,
+    targetHeight: w,
+    frameRate: k = 24,
+    repeat: C = !0,
+    flipHorizontal: E = !1,
+    update: S
+  }) {
+    if (this.ready = !1, !l)
+      throw new Error("Sprite not provided required parameter frameWidth");
+    if (!h)
+      throw new Error("Sprite not provided required parameter frameHeight");
+    if (!t)
+      throw new Error(
+        "Sprite not provided with src or preloaded image: needs parameter src or image"
+      );
+    this.image = new Image(), this.image.onload = () => {
+      this.ready = !0, n ? (this.frames = n, console.log(
+        "Defined sprite with",
+        this.frames,
+        "frames (from parameter)"
+      )) : (this.frames = this.framesAcross * this.framesDown, console.log(
+        "Defined sprite with",
+        this.frames,
+        "frames (calculated from grid)"
+      ));
+    }, this.image.src = t, this.animate = r, this.frameWidth = l, this.frameHeight = h, this.frameRate = k, this.x = e, this.y = i, this.angle = c, this.frameAnimationIndex = s, this.frameSequence = a, this.targetWidth = u || l, this.targetHeight = w || h, this.update = S, this.repeat = C, this.flipHorizontal = E, console.log("Defined sprite with", this.frames, "frames", n);
+  }
+  get framesAcross() {
+    return this.image.width / this.frameWidth;
+  }
+  get framesDown() {
+    return this.image.height / this.frameHeight;
+  }
+  get frame() {
+    const t = this.frames ?? 1;
+    if (this.repeat)
+      if (this.frameSequence) {
+        const e = this.frameAnimationIndex % this.frameSequence.length;
+        return this.frameSequence[Math.floor(e)];
+      } else
+        return this.frameAnimationIndex % t;
+    else
+      return this.frameSequence ? this.frameSequence[Math.min(
+        Math.floor(this.frameAnimationIndex),
+        this.frameSequence.length - 1
+      )] : Math.min(Math.floor(this.frameAnimationIndex), t - 1);
+  }
+  get rowNum() {
+    return Math.floor(Math.floor(this.frame) / this.framesAcross);
+  }
+  get colNum() {
+    return Math.floor(this.frame) % this.framesAcross;
+  }
+  get frameX() {
+    return this.colNum * this.frameWidth;
+  }
+  get frameY() {
+    return this.rowNum * this.frameHeight;
+  }
+  /**
+   * Create a copy of sprite.
+   * @param newParams settings to override
+   * @return a copy of sprite
+   */
+  copy(t) {
+    const e = { ...this, ...t, src: this.image.src };
+    return new m(e);
+  }
+  /**
+   * draw sprite to canvas
+   */
+  draw(t) {
+    const { ctx: e, elapsed: i, stepTime: s, remove: n } = t;
+    if (this.removeOnNextFrame && n(), !this.ready)
+      e.fillText("Loading image...", this.x, this.y);
+    else {
+      if (this.update && this.update(this, t), this.angle || this.flipHorizontal) {
+        const r = this.x + this.targetWidth / 2, a = this.y + this.targetHeight / 2;
+        e.translate(r, a), this.flipHorizontal && e.scale(-1, 1), this.angle && e.rotate(this.angle), e.translate(-r, -a);
+      }
+      e.drawImage(
+        this.image,
+        this.frameX,
+        this.frameY,
+        this.frameWidth,
+        this.frameHeight,
+        this.x,
+        this.y,
+        this.targetWidth,
+        this.targetHeight
+      ), this.animate && (this.frameAnimationIndex += s / (1e3 / this.frameRate)), e.setTransform(1, 0, 0, 1, 0, 0);
+    }
+  }
+}
 class d {
   constructor(t) {
     this.isVisible = !0, this.isEnabled = !0, this.element = t;
@@ -1002,12 +1129,16 @@ let lastSpawnTime = 0; // Time when the last ball was spawned
 let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
 let gameOver = false; // Game over state
 let MisClicks = 0; // Number of missed clicks
+let cursorX = 0;
+let cursorY = 0;
+let previouscursorX = 0;
+let previouscursorY = 0;
 
 /* Drawing Functions */
 //treacher helped with the spawnball function
 function spawnBall({ width, height }) {
   // Generate a random color (written with AI assistance)
-  const colors = ["red", "blue", "green", "yellow", "purple", "orange", "cyan"];
+  const colors = [ "yellow"];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
   let newBall = {
@@ -1021,6 +1152,19 @@ function spawnBall({ width, height }) {
   newBall.speed *= speedmultiplier;
   balls.push(newBall);
 }
+let ghost = new m({
+  src: "ghostsprite.png",
+  x: 400,
+  y: 400,
+  frameWidth: 96,
+  frameHeight: 96,
+  
+  frameRate: 2,
+  animate: true,
+  frames: 12,
+});
+gi.addDrawing(ghost);
+
 /*
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
 // draw a ghost that eat balls(figure out later)
@@ -1070,7 +1214,7 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
     ctx.beginPath();
     // draw line from center to edge...
     ctx.moveTo(ball.x, ball.y);
-    ctx.arc(ball.x, ball.y, ball.radius,Math.PI*0.252, Math.PI * 2);
+    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15, Math.PI * 1.85);
     // and back to center
     ctx.lineTo(ball.x, ball.y);
     ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
@@ -1124,10 +1268,28 @@ gi.addHandler("mousedown", function ({ event, x, y }) {
   }
 });
 
+
 // set ghost position to mouse position
-gi.addHandler("mousemove", function ({ event, x, y }) {
+gi.addHandler("mousemove", function ({ x, y }) {
+  cursorX = x;
+  cursorY = y;
+  ghost.x = cursorX-48; // center ghost sprite
+  ghost.y = cursorY-48 ; // center ghost sprite
+  let deltax = cursorX - previouscursorX;
+  let deltay = cursorY - previouscursorY;
+  if (deltax > 0 && Math.abs(deltax) > Math.abs(deltay)) {
+    ghost.frameSequence = [0, 1, 2];
+  } else if (deltax < 0 && Math.abs(deltax) > Math.abs(deltay)) {
+    ghost.frameSequence = [6, 7, 8];
+  } else if (deltay > 0 && Math.abs(deltay) > Math.abs(deltax)) {
+    ghost.frameSequence = [3, 4, 5];
+  } else if (deltay < 0 && Math.abs(deltay) > Math.abs(deltax)) {
+    ghost.frameSequence = [9, 10, 11];
+  }
+  previouscursorX = cursorX;
+  previouscursorY = cursorY;
 });
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-fe0a4d9d.js.map
+//# sourceMappingURL=index-442dd45f.js.map
