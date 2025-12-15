@@ -62,13 +62,16 @@ function spawnBall({ width, height }) {
   newBall.speed *= speedmultiplier;
   balls.push(newBall);
 }
+
+let GHOST_SIZE = 47;
 let ghost = new Sprite({
   src: "ghostsprite.png",
   x: 400,
   y: 400,
   frameWidth: 96,
   frameHeight: 96,
-  
+  targetHeight: GHOST_SIZE,
+  targetWidth: GHOST_SIZE,
   frameRate: 2,
   animate: true,
   frames: 12,
@@ -183,8 +186,8 @@ gi.addHandler("mousedown", function ({ event, x, y }) {
 gi.addHandler("mousemove", function ({ x, y }) {
   cursorX = x;
   cursorY = y;
-  ghost.x = cursorX-48; // center ghost sprite
-  ghost.y = cursorY-48 ; // center ghost sprite
+  ghost.x = cursorX-GHOST_SIZE/2; // center ghost sprite
+  ghost.y = cursorY-GHOST_SIZE/2 ; // center ghost sprite
   let deltax = cursorX - previouscursorX;
   let deltay = cursorY - previouscursorY;
   if (deltax > 0 && Math.abs(deltax) > Math.abs(deltay)) {
