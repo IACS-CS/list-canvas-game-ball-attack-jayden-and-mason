@@ -15,7 +15,7 @@
 
 import "./style.css";
 
-import { GameInterface } from "simple-canvas-library";
+import { GameInterface, Sprite } from "simple-canvas-library";
 
 let gi = new GameInterface();
 //from last project I did -MJ
@@ -39,17 +39,16 @@ let lastSpawnTime = 0; // Time when the last ball was spawned
 let speedmultiplier = 1.0; // Speed multiplier for ball acceleration
 let gameOver = false; // Game over state
 let MisClicks = 0; // Number of missed clicks
-let ghost = {
-  x: 50,
-  y: 100,
-  eating : 0,
-}
+let cursorX = 0;
+let cursorY = 0;
+let previouscursorX = 0;
+let previouscursorY = 0;
 
 /* Drawing Functions */
 //treacher helped with the spawnball function
 function spawnBall({ width, height }) {
   // Generate a random color (written with AI assistance)
-  const colors = ["red", "blue", "green", "yellow", "purple", "orange", "cyan"];
+  const colors = [ "yellow"];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
   let newBall = {
@@ -63,6 +62,19 @@ function spawnBall({ width, height }) {
   newBall.speed *= speedmultiplier;
   balls.push(newBall);
 }
+let ghost = new Sprite({
+  src: "ghostsprite.png",
+  x: 400,
+  y: 400,
+  frameWidth: 96,
+  frameHeight: 96,
+  
+  frameRate: 2,
+  animate: true,
+  frames: 12,
+})
+gi.addDrawing(ghost);
+
 /*
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
 // draw a ghost that eat balls(figure out later)
@@ -112,7 +124,7 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
     ctx.beginPath();
     // draw line from center to edge...
     ctx.moveTo(ball.x, ball.y);
-    ctx.arc(ball.x, ball.y, ball.radius,Math.PI*0.252, Math.PI * 2);
+    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15, Math.PI * 1.85);
     // and back to center
     ctx.lineTo(ball.x, ball.y);
     ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
@@ -166,10 +178,26 @@ gi.addHandler("mousedown", function ({ event, x, y }) {
   }
 });
 
+
 // set ghost position to mouse position
-gi.addHandler("mousemove", function ({ event, x, y }) {
-  ghost.x = x; // Center the ghost on the cursor
-  ghost.y = y;
+gi.addHandler("mousemove", function ({ x, y }) {
+  cursorX = x;
+  cursorY = y;
+  ghost.x = cursorX-48; // center ghost sprite
+  ghost.y = cursorY-48 ; // center ghost sprite
+  let deltax = cursorX - previouscursorX;
+  let deltay = cursorY - previouscursorY;
+  if (deltax > 0 && Math.abs(deltax) > Math.abs(deltay)) {
+    ghost.frameSequence = [0, 1, 2]
+  } else if (deltax < 0 && Math.abs(deltax) > Math.abs(deltay)) {
+    ghost.frameSequence = [6, 7, 8]
+  } else if (deltay > 0 && Math.abs(deltay) > Math.abs(deltax)) {
+    ghost.frameSequence = [3, 4, 5]
+  } else if (deltay < 0 && Math.abs(deltay) > Math.abs(deltax)) {
+    ghost.frameSequence = [9, 10, 11]
+  }
+  previouscursorX = cursorX;
+  previouscursorY = cursorY;
 });
 
 /* Run the game */
