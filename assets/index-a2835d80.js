@@ -1110,13 +1110,13 @@ class T extends p {
 let gi = new T();
 //from last project I did -MJ
 let topbar = gi.addTopBar();
-topbar.addTitle("Ball Attack");
+topbar.addTitle("Pacman Attack");
 topbar.addButton({
   text: "Instructions",
   onclick: function () {
     gi.dialog(
       "Instructions",
-      "Click on the balls before they reach the right side of the screen!\nClick 'R' to restart the game if you lose."
+      "Click on the Pacmen before they reach the right side of the screen!\nClick 'R' to restart the game if you lose."
     );
   },
 });
@@ -1133,6 +1133,15 @@ let cursorX = 0;
 let cursorY = 0;
 let previouscursorX = 0;
 let previouscursorY = 0;
+let cherry = {
+  x: Math.random() * (200),
+  y: Math.random() * (200),
+  counter : 0,
+  image : new Image(),
+};
+cherry.image.src = "pacman cherry2.png";
+//let fragments = [];
+
 
 /* Drawing Functions */
 //treacher helped with the spawnball function
@@ -1153,6 +1162,27 @@ function spawnBall({ width, height }) {
   balls.push(newBall);
 }
 
+gi.addDrawing(function drawCherry({ ctx, width, height, stepTime }) {
+  // draw cherry png at x or y
+  ctx.drawImage(cherry.image, cherry.x-40, cherry.y-60, 80, 80);
+  // increment cherry counter
+  cherry.counter += stepTime;
+  // if counter > 20000, move cherry to new random location and reset counter
+  if (cherry.counter > 20000) {
+    cherry.x = Math.random() * (width - 100);
+    cherry.y = Math.random() * (height - 100);
+    cherry.counter = 0;
+  }
+  for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry.x && ball.x - ball.radius < cherry.x + 80 &&
+       ball.y + ball.radius > cherry.y && ball.y - ball.radius < cherry.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+});
+
 let GHOST_SIZE = 47;
 let ghost = new m({
   src: "ghostsprite.png",
@@ -1167,6 +1197,25 @@ let ghost = new m({
   frames: 12,
 });
 gi.addDrawing(ghost);
+/*
+gi.addDrawing(function drawFragments({ ctx, width, height, elapsed, stepTime }) {
+for (let i=0; i<fragments.length; i++) {
+  let frag = fragments[i];
+  frag.x += frag.vx * stepTime / 1000;
+  frag.y += frag.vy * stepTime / 1000;
+  frag.vy += 50 * stepTime / 1000;
+  fragments.vx *= 0.2;
+  ctx.beginPath();
+  ctx.fillStyle = "yellow";
+  ctx.arc(frag.x, frag.y, frag.radius, 0, Math.PI * 2);
+  ctx.fill();
+  if (frag.y - frag.radius > height) {
+    fragments.splice(i, 1);
+    i--;
+  }
+}
+}
+  */
 
 /*
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
@@ -1217,7 +1266,9 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
     ctx.beginPath();
     // draw line from center to edge...
     ctx.moveTo(ball.x, ball.y);
-    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15, Math.PI * 1.85);
+    let openness = (Math.sin(elapsed / 200) + 1) / 2; // value between 0 and 1
+    // arc from 0.15pi to 1.85pi
+    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15 * openness, Math.PI * (2 - .15 * openness));
     // and back to center
     ctx.lineTo(ball.x, ball.y);
     ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
@@ -1241,6 +1292,7 @@ gi.addHandler("keydown", function ({ event }) {
     spawnInterval = 1500;
     lastSpawnTime = 0;
     speedmultiplier = 1.0;
+    MisClicks = 0;
     gameOver = false;
   }
 });
@@ -1295,4 +1347,4 @@ gi.addHandler("mousemove", function ({ x, y }) {
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-afa18fbc.js.map
+//# sourceMappingURL=index-a2835d80.js.map
