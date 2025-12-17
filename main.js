@@ -1,14 +1,14 @@
 /* Main game file: main.js */
-/* Game: [Ball Attack] */
+/* Game: [Pacman Attack] */
 /* Authors: [Mason Januskiewicz, Jayden Conde] */
-/* Description: [Balls are coming from the left side of the screen moving to the other side, */
-/*and you need to click on them to get rid of them depending on the radius. */
-/*You try to get rid of them before they make it across. They accelerate over time.] */
-/* Citations: [AI will most likely be used to spot check and clear up any small bugs we do not understand */
-/*and will get help from teacher whenever option is avalable] */
+/* Description: Pacman are coming from the left side of the screen moving to the other side, */
+/*and you need to use the ghost to click on them to stop them from reaching the other side. */
+/*You try to get rid of them before they make it across, and they increase in speed as you increase in score, while also going at random rates */
+/* Citations: We used AI auto complete to make the ghost sprite directional change thing, and splice, 
+randomization of color, and when press r game resets (kinda)*/
 /* Note: If you use significant AI help you should cite that here as well */
 /* including summaries of prompts and/or interactions you had with the AI */
-/* In addition, of course, any AI-generated code should be clearly maked */
+/* In addition, of course, any AI-generated code should be clearly marked */
 /* in comments throughout the code, though of course when using e.g. CoPilot */
 /* auto-complete it maye be impractical to mark every line, which is why you */
 /* should also include a summary here */
@@ -20,13 +20,13 @@ import { GameInterface, Sprite } from "simple-canvas-library";
 let gi = new GameInterface();
 //from last project I did -MJ
 let topbar = gi.addTopBar();
-topbar.addTitle("Ball Attack");
+topbar.addTitle("Pacman Attack");
 topbar.addButton({
   text: "Instructions",
   onclick: function () {
     gi.dialog(
       "Instructions",
-      "Click on the balls before they reach the right side of the screen!\nClick 'R' to restart the game if you lose."
+      "Click on the Pacmen before they reach the right side of the screen!\nClick 'R' to restart the game if you lose."
     );
   },
 });
@@ -43,6 +43,15 @@ let cursorX = 0;
 let cursorY = 0;
 let previouscursorX = 0;
 let previouscursorY = 0;
+let cherry = {
+  x: Math.random() * (200),
+  y: Math.random() * (200),
+  counter : 0,
+  image : new Image(),
+};
+cherry.image.src = "pacman cherry2.png";
+//let fragments = [];
+
 
 /* Drawing Functions */
 //treacher helped with the spawnball function
@@ -63,6 +72,27 @@ function spawnBall({ width, height }) {
   balls.push(newBall);
 }
 
+gi.addDrawing(function drawCherry({ ctx, width, height, stepTime }) {
+  // draw cherry png at x or y
+  ctx.drawImage(cherry.image, cherry.x-40, cherry.y-60, 80, 80);
+  // increment cherry counter
+  cherry.counter += stepTime;
+  // if counter > 20000, move cherry to new random location and reset counter
+  if (cherry.counter > 20000) {
+    cherry.x = Math.random() * (width - 100);
+    cherry.y = Math.random() * (height - 100);
+    cherry.counter = 0;
+  }
+  for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry.x && ball.x - ball.radius < cherry.x + 80 &&
+       ball.y + ball.radius > cherry.y && ball.y - ball.radius < cherry.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+});
+
 let GHOST_SIZE = 47;
 let ghost = new Sprite({
   src: "ghostsprite.png",
@@ -77,6 +107,25 @@ let ghost = new Sprite({
   frames: 12,
 })
 gi.addDrawing(ghost);
+/*
+gi.addDrawing(function drawFragments({ ctx, width, height, elapsed, stepTime }) {
+for (let i=0; i<fragments.length; i++) {
+  let frag = fragments[i];
+  frag.x += frag.vx * stepTime / 1000;
+  frag.y += frag.vy * stepTime / 1000;
+  frag.vy += 50 * stepTime / 1000;
+  fragments.vx *= 0.2;
+  ctx.beginPath();
+  ctx.fillStyle = "yellow";
+  ctx.arc(frag.x, frag.y, frag.radius, 0, Math.PI * 2);
+  ctx.fill();
+  if (frag.y - frag.radius > height) {
+    fragments.splice(i, 1);
+    i--;
+  }
+}
+}
+  */
 
 /*
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
@@ -127,7 +176,9 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
     ctx.beginPath();
     // draw line from center to edge...
     ctx.moveTo(ball.x, ball.y);
-    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15, Math.PI * 1.85);
+    let openness = (Math.sin(elapsed / 200) + 1) / 2; // value between 0 and 1
+    // arc from 0.15pi to 1.85pi
+    ctx.arc(ball.x, ball.y, ball.radius, Math.PI * 0.15 * openness, Math.PI * (2 - .15 * openness));
     // and back to center
     ctx.lineTo(ball.x, ball.y);
     ctx.fillStyle = ball.color; // Use the ball's color instead of "red"
@@ -151,6 +202,7 @@ gi.addHandler("keydown", function ({ event }) {
     spawnInterval = 1500;
     lastSpawnTime = 0;
     speedmultiplier = 1.0;
+    MisClicks = 0;
     gameOver = false;
   }
 });
