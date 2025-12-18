@@ -1140,6 +1140,22 @@ let cherry = {
   image : new Image(),
 };
 cherry.image.src = "pacman cherry2.png";
+let cherry2 = {
+  x: Math.random() * (200),
+  y: Math.random() * (200),
+  counter : 0,
+  image : new Image(),
+  active: false,
+};
+cherry2.image.src = "pacman cherry2.png";
+let cherry3 = {
+  x: Math.random() * (200),
+  y: Math.random() * (200),
+  counter : 0,
+  image : new Image(),
+  active: false,
+};
+cherry3.image.src = "pacman cherry2.png";
 //let fragments = [];
 
 
@@ -1164,7 +1180,7 @@ function spawnBall({ width, height }) {
 
 gi.addDrawing(function drawCherry({ ctx, width, height, stepTime }) {
   // draw cherry png at x or y
-  ctx.drawImage(cherry.image, cherry.x-40, cherry.y-60, 80, 80);
+  ctx.drawImage(cherry.image, cherry.x-40, cherry.y-50, 80, 80);
   // increment cherry counter
   cherry.counter += stepTime;
   // if counter > 20000, move cherry to new random location and reset counter
@@ -1182,6 +1198,82 @@ gi.addDrawing(function drawCherry({ ctx, width, height, stepTime }) {
       }
   }
 });
+
+gi.addDrawing(function drawCherry2({ ctx, width, height, stepTime }) {
+  // draw cherry png at x or y
+  if (HitCount >= 100 && !cherry2.active){
+    cherry2.counter = 0;
+    cherry2.active = true;
+    cherry2.x = Math.random() * (width - 100);
+    cherry2.y = Math.random() * (height - 100);
+    ctx.drawImage(cherry2.image, cherry2.x-40, cherry2.y-50, 80, 80);
+    for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry2.x && ball.x - ball.radius < cherry2.x + 80 &&
+       ball.y + ball.radius > cherry2.y && ball.y - ball.radius < cherry2.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+  }
+  if (!cherry2.active) return;
+  ctx.drawImage(cherry2.image, cherry2.x - 40, cherry2.y - 50, 80, 80);
+ // increment cherry counter
+  cherry2.counter += stepTime;
+  // if counter > 20000, move cherry to new random location and reset counter
+  if (cherry2.counter > 20000) {
+    cherry2.x = Math.random() * (width - 100);
+    cherry2.y = Math.random() * (height - 100);
+    cherry2.counter = 0;
+  }
+  for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry2.x && ball.x - ball.radius < cherry2.x + 80 &&
+       ball.y + ball.radius > cherry2.y && ball.y - ball.radius < cherry2.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+  
+});
+gi.addDrawing(function drawCherry3({ ctx, width, height, stepTime }) {
+  // draw cherry png at x or y
+  if (HitCount >= 200 && !cherry3.active){
+    cherry3.counter = 0;
+    cherry3.active = true;
+    cherry3.x = Math.random() * (width - 100);
+    cherry3.y = Math.random() * (height - 100);
+    ctx.drawImage(cherry3.image, cherry3.x-40, cherry3.y-50, 80, 80);
+    for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry3.x && ball.x - ball.radius < cherry3.x + 80 &&
+       ball.y + ball.radius > cherry3.y && ball.y - ball.radius < cherry3.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+  }
+  if (!cherry3.active) return;
+  ctx.drawImage(cherry3.image, cherry3.x - 40, cherry3.y - 50, 80, 80);
+ // increment cherry counter
+  cherry3.counter += stepTime;
+  // if counter > 20000, move cherry to new random location and reset counter
+  if (cherry3.counter > 20000) {
+    cherry3.x = Math.random() * (width - 100);
+    cherry3.y = Math.random() * (height - 100);
+    cherry3.counter = 0;
+  }
+  for (let ball of balls) {
+    //ai assisted collision detection between ball and cherry
+    if (ball.x + ball.radius > cherry3.x && ball.x - ball.radius < cherry3.x + 80 &&
+       ball.y + ball.radius > cherry3.y && ball.y - ball.radius < cherry3.y + 80) {
+    balls.splice(balls.indexOf(ball), 1);
+      HitCount++;
+      }
+  }
+  
+});
+
 
 let GHOST_SIZE = 47;
 let ghost = new m({
@@ -1347,4 +1439,4 @@ gi.addHandler("mousemove", function ({ x, y }) {
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-a2835d80.js.map
+//# sourceMappingURL=index-ad97cd79.js.map
